@@ -384,9 +384,492 @@ $$\hat{x}_{n,n}=\hat{x}_{n,n-1}+\alpha(z_n-\hat{x}_{n,n-1})$$
 
 > $\alpha-\beta$追踪更新方程:
 
-* 位置更新方程:
-$$\hat{x}_{n,n}=\hat{x}_{n,n-1}+\alpha(z_)$$
+* 位置状态更新方程:
+$$\hat{x}_{n,n}=\hat{x}_{n,n-1}+\alpha(z_n-\hat{x}_{n,n-1})$$
+* 速度状态更新方程
+$$\hat{\dot{x}}_{n,n}=\hat{\dot{x}}_{n,n-1}+\beta(\frac{z_n-\hat{x}_{n,n-1}}{\Delta t})$$
 
+#### 2.2.2 估计算法
+示例中用到的估计算法如下:
+![Chart](./ex2_estimationAlgorithm.png)
+
+#### 2.2.3 数值示例
+**考虑飞机飞机在一维世界中运动**
+
+* $\alpha=0.2$
+* $\beta=0.1$
+* 追踪时间间隔为$5s$
+
+> 提示:注：在本例中，我们将使用非常不精确的雷达和低速目标（UAV）来更好地进行图形表示。在现实生活中，雷达通常更精确，目标可以更快。
+
+##### ①迭代0
+
+**初始化**
+
+$n=0$时的初始条件设为:
+$$\hat{x}_{0,0}=30000m$$
+$$\hat{\dot{x}}_{0,0}=40m/s$$
+
+**预测**   
+通过状态外推方程，预测($n=1$)时的状态:
+$$\hat{x}_{n+1,n}=\hat{x}_{n,n}+\Delta t \hat{\dot{x}}_{n,n} \rightarrow \hat{x}_{1,0}=\hat{x}_{0,0} + \Delta t\hat{\dot{x}}_{0,0}=30000+5*40=30200m$$
+
+$$\hat{\dot{x}}_{n+1,n}=\hat{\dot{x}}_{n,n}\rightarrow\hat{\dot{x}}_{1,0}=\hat{\dot{x}}_{0,0}=40m/s$$
+
+##### ②迭代1   
+预估计状态($n=1$):
+$$\hat{x}_{n,n-1}=\hat{x}_{1,0}=30200m$$
+$$\hat{\dot{x}}_{n,n-1}=\hat{\dot{x}}_{1,0}=40m/s$$
+
+**第一步**   
+雷达测量值:
+$$z_1=30110m$$
+
+**第二步**
+用状态更新方程计算当前估计:
+$$\hat{x}_{1,1}=\hat{x}_{1,0}+\alpha(z_1-\hat{x}_{1,0})=30200+0.2\times(30110-30200)=30182m$$
+$$\hat{\dot{x}}_{1,1}=\hat{\dot{x}}_{1,0}+\beta(\frac{z_1-\hat{x}_{1,0}}{\Delta t})=40+0.1\times(\frac{30110-30200}{5})=38.2m/s$$
+**第三步**
+用状态外推方程计算下一时刻的估计
+$$\hat{x}_{2,1}=\hat{x}_{1,1}+ \Delta t\hat{\dot{x}}_{1,1}=30182+5\times38.2=30373$$
+$$\hat{\dot{x}}_{2,1}=\hat{\dot{x}}_{1,1}=38.2m/s$$
+
+##### ③迭代2
+时间延迟后，来自上一次迭代的预估计值称为当前迭代中的上一次估计。
+$$\hat{x}_{2,1}=30373m$$
+$$\hat{\dot{x}}_{2,1}=38.2m/s$$
+
+**第一步**
+雷达测量值:
+$$z_2=30265m$$
+
+**第二步**
+用状态更新方程计算当前估计:
+$$\hat{x}_{2,2}=\hat{x}_{2,1}+\alpha(z_2-\hat{x}_{2,1})=30373+0.2\times(30265-30373)=30351.4m$$
+$$\hat{\dot{x}}_{2,2}=\hat{\dot{x}}_{2,1}+\beta(\frac{z_2-\hat{x}_{2,1}}{\Delta t})=38.2+0.1\times(\frac{30265-30373}{5})=36m/s$$
+**第三步**
+用状态外推方程计算下一时刻估计
+$$\hat{x}_{3,2}=\hat{x}_{2,2} + \Delta t\hat{\dot{x}}_{2,2}=30351.4+5\times36=30531.4m$$
+$$\hat{\dot{x}}_{3,2}=\hat{\dot{x}}_{2,2}=36m/s$$
+
+##### ④迭代3
+时间延迟后，来自上一次迭代的预估计值称为当前迭代中的上一次估计。
+$$\hat{x}_{3,2}=30531.4m$$
+$$\hat{\dot{x}}_{3,2}=36m/s$$
+
+**第一步**   
+雷达测量值
+$$z_3=30740m$$
+
+**第二步**   
+用状态更新方程计算当前估计：
+$$\hat{x}_{3,3}=\hat{x}_{3,2}+ \alpha(z_3-\hat{x}_{3,2})=30531.4+0.2\times(30740-30531.4)=30573.12m$$
+$$\hat{\dot{x}}_{3,3}=\hat{\dot{x}}_{3,2}+\beta(\frac{z_2-\hat{x}_{3,2}}{\Delta t})=36+0.1\times(\frac{30740-30531.4}{5})=40.172m/s$$
+
+**第三步**
+用状态外推方程计算下一时刻估计:
+$$\hat{x}_{4,3}=\hat{x}_{3,3}+\Delta t\hat{\dot{x}}_{3,3}=30573.12+5\times40.172=30773.98m$$
+$$\hat{\dot{x}}_{4,3}=\hat{\dot{x}}_{3,3}=40.172m/s$$
+
+##### ⑤迭代4
+时间延迟后，来自上一次迭代的预估计值称为当前迭代的上一次估计。
+$$\hat{x}_{4,3}=30773.98m$$
+$$\hat{\dot{x}}_{4,3}=40.172m/s$$
+
+**第一步**
+雷达测量值   
+$$z_4=30750m$$
+
+**第二步**   
+用状态更新方程计算当前估计
+$$\hat{x}_{4,4}=\hat{x}_{4,3}+\alpha(z_4-\hat{x}_{4,3})=30773.98+0.3\times(30750-30773.98)=30766.786m$$
+$$\hat{\dot{x}}_{4,4}=\hat{\dot{x}}_{4,3}+\beta(\frac{z_4-\hat{x}_{4,3}}{\Delta t})=40.172+0.1\times(\frac{30750-30773.98}{5})=39.7m/s$$
+
+**第三步**
+用状态外推方程计算下一时刻估计:
+$$\hat{x}_{5,4}=\hat{x}_{4,4}+\Delta t\hat{\dot{x}}_{4,4}=30766.786+5\times39.7=30965.286m$$
+$$\hat{\dot{x}}_{5,4}=\hat{\dot{x}}_{4,4}=39.7m/s$$
+
+##### ⑥迭代5
+时间延迟后，来自上一次迭代的预估计值称为当前迭代的上一次估计。
+$$\hat{x}_{5,4}=30965.286m$$
+$$\hat{\dot{x}}_{5,4}=39.7m/s$$
+
+**第一步**   
+第五次测量
+$$z_5=31135m$$
+
+**第二步**
+用状态更新方程计算当前估计:
+$$\hat{x}_{5,5}=\hat{x}_{5,4}+\alpha(z_5-\hat{x}_{5,4})=30965.286+0.2\times(31135-30965.286)=30999.23m$$
+$$\hat{\dot{x}}_{5,5}=\hat{\dot{x}}_{5,4}+\beta(\frac{z_5-\hat{x}_{5,4}}{5})=39.7+0.1\times(\frac{31135-30965.286}{5})=43.094m/s$$
+
+
+**第三步**
+用状态外推方程计算下一时刻估计:
+$$\hat{x}_{6,5}=\hat{x}_{5,5}+\Delta t\hat{\dot{x}}_{5,5}=30999.23+5\times43.094=31214.7m$$
+$$\hat{\dot{x}}_{6,5}=\hat{\dot{x}}_{5,5}=43.094m/s$$
+
+
+z6=31015
+z7=31180
+z8=31610
+z9=31960
+z10=31865
+
+****
+
+### 卡曼滤波示例
+#### 例9：载具位置估计
+![Chart](./ex9_vehicle.png)
+* 本例中估计载具在$x,y$平面内的位置
+* 载具包含位置传感器(能输出当前$x,y$坐标)
+* 假设系统加速度恒定
+
+① 状态外推方程   
+* 通用格式状态外推方程:
+$$\hat{\boldsymbol{x}}_{n+1,n}=\boldsymbol{F}\hat{\boldsymbol{x}}_{n,n}+\boldsymbol{G}\boldsymbol{u}_n+\boldsymbol{w}_n$$
+
+>式中:   
+$\hat{\boldsymbol{x}}_{n+1,n}$&emsp;是$n+1$时刻的系统状态矢量的预测   
+$\hat{\boldsymbol{x}}_{n,n}$&emsp;&emsp;是$n$时刻的系统状态矢量的估计   
+$\boldsymbol{u}_n$&nbsp;&nbsp; &emsp;&emsp;是控制变量   
+$\boldsymbol{w}_n$&nbsp;&nbsp;&emsp;&emsp;是过程噪声   
+$\boldsymbol{F}$&nbsp;&nbsp; &nbsp; &emsp;&emsp;是状态变换矩阵   
+$\boldsymbol{G}$&nbsp; &nbsp; &emsp;&emsp;是控制矩阵
+
+* 对于本例忽略控制变量(输入)，过程噪声，状态变量可以简化为：
+$$\hat{\boldsymbol{x}}_{n+1,n}=\boldsymbol{F}\hat{\boldsymbol{x}}_{n,n}$$
+系统状态矢量$\boldsymbol{x}_n$定义为:
+$$\boldsymbol{x}_n=\begin{bmatrix}
+x_n\\
+\dot{x}_n\\
+\ddot{x}_n\\
+y_n\\
+\dot{y}_n\\
+\ddot{y}_n\\
+\end{bmatrix}$$
+
+$n+1$时刻的系统状态可以描述为:
+$$\left\{
+\begin{aligned}
+\hat{x}_{n+1,n}&=\hat{x}_{n,n}+\hat{\dot{x}}_{n,n}\Delta t +\frac{1}{2}\hat{\dot{x}}_{n,n}\Delta t^2\\
+\hat{\dot{x}}_{n+1,n}&=\hat{\dot{x}}_{n,n}+\hat{\ddot{x}}_{n,n}\Delta t\\
+\hat{\ddot{x}}_{n+1,n}&=\hat{\ddot{x}}_{n,n}\\
+\hat{y}_{n+1,n}&=\hat{y}_{n,n}+\hat{\dot{y}}_{n,n}\Delta t +\frac{1}{2}\hat{\dot{y}}_{n,n}\Delta t^2\\
+\hat{\dot{y}}_{n+1,n}&=\hat{\dot{y}}_{n,n}+\hat{\ddot{y}}_{n,n}\Delta t\\
+\hat{\ddot{y}}_{n+1,n}&=\hat{\ddot{y}}_{n,n}\\
+\end{aligned}
+\right.
+$$
+
+写成矩阵格式:
+
+$$\begin{bmatrix}
+  \hat{x}_{n+1,n}\\
+  \hat{\dot{x}}_{n+1,n}\\
+  \hat{\ddot{x}}_{n+1.n}\\
+  \hat{y}_{n+1,n}\\
+  \hat{\dot{y}}_{n+1,n}\\
+  \hat{\ddot{y}}_{n+1.n}\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+  1&\Delta t&\frac{1}{2}\Delta t^2&0&0&0\\
+  0&1&\Delta t&0&0&0\\
+  0&0&1&0&0&0\\
+  0&0&0&1&\Delta t&\frac{1}{2}\Delta t^2\\
+  0&0&0&0&1&\Delta t\\
+  0&0&0&0&0&1\\
+\end{bmatrix}
+\begin{bmatrix}
+  \hat{x}_{n,n}\\
+  \hat{\dot{x}}_{n,n}\\
+  \hat{\ddot{x}}_{n.n}\\
+  \hat{y}_{n,n}\\
+  \hat{\dot{y}}_{n,n}\\
+  \hat{\ddot{y}}_{n.n}\\
+\end{bmatrix}
+$$
+
+②协方差外推方程   
+* 通用格式协方差外推方程:
+$$\boldsymbol{P}_{n+1,n}=\boldsymbol{FP_{n,n}F^T}+\boldsymbol{Q}$$ 
+
+>式中:   
+$\boldsymbol{P_{n,n}}$&emsp; &nbsp; &nbsp;&nbsp;是当前状态估计不确定性的协方差矩阵   
+$\boldsymbol{P_{n+1,n}}$&emsp;是下一状态预测不确定性的协方差矩阵   
+$\boldsymbol{F}$&emsp;&emsp;&emsp;&nbsp; &nbsp;是状态变换矩阵   
+$\boldsymbol{Q}$&emsp;&emsp;&emsp;&nbsp; &nbsp;是过程噪声矩阵
+
+估计不确定性矩阵$\boldsymbol{P}$:
+$$\boldsymbol{P}=\begin{bmatrix}
+  p_x&p_{x\dot{x}}&p_{x\ddot{x}}&p_{xy}&p_{x\dot{y}}&p_{x\ddot{y}}\\
+  p_{\dot{x}x}&p_{\dot{x}}&p_{\dot{x}\ddot{x}}&p_{\dot{x}y}&p_{\dot{x}\dot{y}}&p_{\dot{x}\ddot{y}}\\
+  p_{\ddot{x}x}&p_{\ddot{x}\dot{x}}&p_{\ddot{x}}&p_{\ddot{x}y}&p_{\ddot{x}\dot{y}}&p_{\ddot{x}\ddot{y}}\\
+  p_{yx}&p_{y\dot{x}}&p_{y\ddot{x}}&p_y&p_{y\dot{y}}&p_{y\ddot{y}}\\
+  p_{\dot{y}x}&p_{\dot{y}\dot{x}}&p_{\dot{y}\ddot{x}}&p_{\dot{y}y}&p_{\dot{y}}&p_{\dot{y}\ddot{y}}\\
+  p_{\ddot{y}x}&p_{\ddot{y}\dot{x}}&p_{\ddot{y}\ddot{x}}&p_{\ddot{y}y}&p_{\ddot{y}\dot{y}}&p_{\ddot{y}}
+\end{bmatrix}$$
+
+> 式中:   
+$p_x$&emsp;&emsp;是$X$方向位移估计的方差   
+$p_{\dot{x}}$&emsp;&emsp;是$X$方向速度估计的方差   
+$p_{\ddot{x}}$&emsp;&emsp;是$X$方向加速度估计的方差   
+$p_y$&emsp;&emsp;是$Y$方向位移估计的方差   
+$p_{\dot{y}}$&emsp;&emsp;是$Y$方向速度估计的方差   
+$p_{\ddot{y}}$&emsp;&emsp;是$Y$方向加速度估计的方差
+
+假设$X,Y$方向的误差估计不相关,协方差矩阵可以简化为:
+$$\boldsymbol{P}=\begin{bmatrix}
+  p_x&p_{x\dot{x}}&p_{x\ddot{x}}&0&0&0\\
+  p_{\dot{x}x}&p_{\dot{x}}&p_{\dot{x}\ddot{x}}&0&0&0\\
+  p_{\ddot{x}x}&p_{\ddot{x}\dot{x}}&p_{\ddot{x}}&0&0&0\\
+  0&0&0&p_y&p_{y\dot{y}}&p_{y\ddot{y}}\\
+  0&0&0&p_{\dot{y}y}&p_{\dot{y}}&p_{\dot{y}\ddot{y}}\\
+  0&0&0&p_{\ddot{y}y}&p_{\ddot{y}\dot{y}}&p_{\ddot{y}}
+\end{bmatrix}$$
+
+状态变换矩阵$\boldsymbol{F}$:
+$$\boldsymbol{F}=
+\begin{bmatrix}
+  1&\Delta t&\frac{1}{2}\Delta t^2&0&0&0\\
+  0&1&\Delta t&0&0&0\\
+  0&0&1&0&0&0\\
+  0&0&0&1&\Delta t&\frac{1}{2}\Delta t^2\\
+  0&0&0&0&1&\Delta t\\
+  0&0&0&0&0&1\\
+\end{bmatrix}
+$$
+
+过程噪声矩阵$\boldsymbol{Q}$：   
+$$\boldsymbol{Q} = 
+  \left[ \begin{matrix}								
+    \sigma_{x}^{2} 				& \sigma_{x\dot{x}}^{2} 			& \sigma_{x\ddot{x}}^{2} 			& \sigma_{xy}^{2} 			& \sigma_{x\dot{y}}^{2}  		& \sigma_{x\ddot{y}}^{2}		\\
+    \sigma_{\dot{x}x}^{2} 		& \sigma_{\dot{x}}^{2} 				& \sigma_{\dot{x}\ddot{x}}^{2}		& \sigma_{\dot{x}y}^{2} 	& \sigma_{\dot{x}\dot{y}}^{2} 	& \sigma_{\dot{x}\ddot{y}}^{2}	\\
+    \sigma_{\ddot{x}x}^{2} 		& \sigma_{\ddot{x}\dot{x}}^{2}		& \sigma_{\ddot{x}}^{2} 			& \sigma_{\ddot{x}y}^{2} 	& \sigma_{\ddot{x}\dot{y}}^{2} 	& \sigma_{\ddot{x}\ddot{y}}^{2}	\\
+    \sigma_{yx}^{2}				& \sigma_{y\dot{x}}^{2} 			& \sigma_{y\ddot{x}}^{2}	 		& \sigma_{y}^{2} 			& \sigma_{y\dot{y}}^{2}			& \sigma_{y\ddot{y}}^{2}		\\
+    \sigma_{\dot{y}x}^{2} 		& \sigma_{\dot{y}\dot{x}}^{2} 		& \sigma_{\dot{y}\ddot{x}}^{2} 		& \sigma_{\dot{y}y}^{2} 	& \sigma_{\dot{y}}^{2}			& \sigma_{\dot{y}\ddot{y}}^{2}	\\
+    \sigma_{\ddot{y}x}^{2} 		& \sigma_{\ddot{y}\dot{x}}^{2} 		& \sigma_{\ddot{y}\ddot{x}}^{2} 	& \sigma_{\ddot{y}y}^{2} 	& \sigma_{\ddot{y}\dot{y}}^{2} 	& \sigma_{\ddot{y}}^{2}			\\
+  \end{matrix}
+  \right]
+$$
+假设$X,Y$方向的噪声不相关,噪声矩阵$\boldsymbol{Q}可简化为:$
+$$\boldsymbol{Q} = 
+  \left[ \begin{matrix}								
+    \sigma_{x}^{2}&\sigma_{x\dot{x}}^{2}& \sigma_{x\ddot{x}}^{2}&0 & 0 & 0\\
+    \sigma_{\dot{x}x}^{2} 		& \sigma_{\dot{x}}^{2} 				& \sigma_{\dot{x}\ddot{x}}^{2}		& 0&0&0\\
+    \sigma_{\ddot{x}x}^{2} 		& \sigma_{\ddot{x}\dot{x}}^{2}		& \sigma_{\ddot{x}}^{2} 			& 0&0&0\\
+    0&0&0& \sigma_{y}^{2} 			& \sigma_{y\dot{y}}^{2}			& \sigma_{y\ddot{y}}^{2}		\\
+    0&0&0 		& \sigma_{\dot{y}y}^{2} 	& \sigma_{\dot{y}}^{2}			& \sigma_{\dot{y}\ddot{y}}^{2}	\\
+    0&0&0 	& \sigma_{\ddot{y}y}^{2} 	& \sigma_{\ddot{y}\dot{y}}^{2} 	& \sigma_{\ddot{y}}^{2}			\\
+  \end{matrix}
+  \right]
+$$  
+
+
+示例中推导得:
+$$
+\boldsymbol{Q}=
+\begin{bmatrix}
+  \frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2} & 0 & 0&0\\
+  \frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t &0 &0 &0\\
+  \Delta t^2              &\Delta t &1&0 &0 &0\\
+  0&0&0&\frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2}\\
+  0&0&0&\frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t\\
+  0&0&0&\Delta t^2              &\Delta t &1\\
+\end{bmatrix}
+\sigma_a^2
+$$
+> 式中:    
+$\Delta t$&emsp;是多次测量的时间间隔   
+$\sigma_a^2$&emsp;是加速度的随机误差
+
+<br/><br/>
+
+带入方程:$\boldsymbol{P}_{n+1,n}=\boldsymbol{FP_{n,n}F^T}+\boldsymbol{Q}$有:   
+$$
+\begin{aligned}
+\boldsymbol{P_{n+1,n}} 
+&=
+\begin{bmatrix}
+  p_{x_{n+1,n}}&p_{{x\dot{x}}_{n+1,n}}&p_{x\ddot{x}_{n+1,n}}&0&0&0\\
+  p_{\dot{x}x_{n+1,n}}&p_{\dot{x}_{n+1,n}}&p_{\dot{x}\ddot{x}_{n+1,n}}&0&0&0\\
+  p_{\ddot{x}x_{n+1,n}}&p_{\ddot{x}\dot{x}_{n+1,n}}&p_{\ddot{x}_{n+1,n}}&0&0&0\\
+  0&0&0&p_{y_{n+1,n}}&p_{y\dot{y}_{n+1,n}}&p_{y\ddot{y}_{n+1,n}}\\
+  0&0&0&p_{\dot{y}y_{n+1,n}}&p_{\dot{y}_{n+1,n}}&p_{\dot{y}\ddot{y}_{n+1,n}}\\
+  0&0&0&p_{\ddot{y}y_{n+1,n}}&p_{\ddot{y}\dot{y}_{n+1,n}}&p_{\ddot{y}_{n+1,n}}
+\end{bmatrix}\\
+&=
+\begin{bmatrix}
+  1&\Delta t&\frac{1}{2}\Delta t^2&0&0&0\\
+  0&1&\Delta t&0&0&0\\
+  0&0&1&0&0&0\\
+  0&0&0&1&\Delta t&\frac{1}{2}\Delta t^2\\
+  0&0&0&0&1&\Delta t\\
+  0&0&0&0&0&1\\
+\end{bmatrix}
+
+\cdot
+\begin{bmatrix}
+  p_{x_{n,n}}&p_{{x\dot{x}}_{n,n}}&p_{x\ddot{x}_{n,n}}&0&0&0\\
+  p_{\dot{x}x_{n,n}}&p_{\dot{x}_{n,n}}&p_{\dot{x}\ddot{x}_{n,n}}&0&0&0\\
+  p_{\ddot{x}x_{n,n}}&p_{\ddot{x}\dot{x}_{n,n}}&p_{\ddot{x}_{n,n}}&0&0&0\\
+  0&0&0&p_{y_{n,n}}&p_{y\dot{y}_{n,n}}&p_{y\ddot{y}_{n,n}}\\
+  0&0&0&p_{\dot{y}y_{n,n}}&p_{\dot{y}_{n,n}}&p_{\dot{y}\ddot{y}_{n,n}}\\
+  0&0&0&p_{\ddot{y}y_{n,n}}&p_{\ddot{y}\dot{y}_{n,n}}&p_{\ddot{y}_{n,n}}
+\end{bmatrix}
+
+\cdot
+\begin{bmatrix}
+  1&0&0&0&0&0\\
+  \Delta t&1&0&0&0&0\\
+  \frac{1}{2}\Delta t^2&\Delta t&1&0&0&0\\
+  0&0&0&1&0&0\\
+  0&0&0&\Delta t&1&0\\
+  0&0&0&\frac{1}{2}\Delta t^2&\Delta t&1\\
+\end{bmatrix}\\
+
+&+
+
+\begin{bmatrix}
+  \frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2} & 0 & 0&0\\
+  \frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t &0 &0 &0\\
+  \Delta t^2              &\Delta t &1&0 &0 &0\\
+  0&0&0&\frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2}\\
+  0&0&0&\frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t\\
+  0&0&0&\Delta t^2              &\Delta t &1\\
+\end{bmatrix}
+  
+\end{aligned}
+$$
+<br/><br/>
+
+
+
+③ 卡曼增益方程   
+* **测量不确定性**   
+测量协方差矩阵:
+$$\boldsymbol{R_n}=
+\begin{bmatrix}
+  \sigma_{x_m}^2&\sigma_{yx_m}^2\\
+  \sigma_{xy_m}^2&\sigma_{y_m}^2
+\end{bmatrix}$$
+> 下标m表示测量不确定性(measurement)
+
+假设$x,y$测量不相关:
+$$\boldsymbol{R_n}=
+\begin{bmatrix}
+  \sigma_{x_m}^2&0\\
+  0&\sigma_{y_m}^2
+\end{bmatrix}$$
+实际测量中，每次测量的不确定性均布相同，算例中假设每次测量中不确定性相等。
+<br/>
+* **测量方程**    
+通用测量方程表示如下:
+$$\boldsymbol{z_n}=\boldsymbol{Hx_n}+\boldsymbol{v_n}$$
+> 式中:   
+$\boldsymbol{z_n}$&emsp;是测量状态量矢量   
+$\boldsymbol{x_n}$&emsp;是系统状态量真值   
+$\boldsymbol{v_n}$&emsp;是随机状态量矢量   
+$\boldsymbol{H}$&emsp;是观测矩阵   
+
+<br/>
+
+观测仅提供$X,Y$的坐标:
+$$\boldsymbol{z_n}=\begin{bmatrix}
+  x_{n,n}\\
+  y_{n,n}
+\end{bmatrix}$$
+
+带入观测方程:
+
+$$\boldsymbol{z_n}=\begin{bmatrix}
+  x_{n,n}\\
+  y_{n,n}
+\end{bmatrix}
+=\boldsymbol{H}
+\cdot
+\begin{bmatrix}
+  x_{n,n}\\
+  \dot{x}_{n,n}\\
+  \ddot{x}_{n,n}\\
+  y_{n,n}\\
+  \dot{y}_{n,n}\\
+  \ddot{y}_{n,n}
+\end{bmatrix}
+$$
+
+可以推导得观测矩阵$\boldsymbol{H}$:   
+$$\boldsymbol{H}=
+\begin{bmatrix}
+  1 & 0 & 0 & 0 & 0 & 0\\
+  0 & 0 & 0 & 1 & 0 & 0
+\end{bmatrix}$$
+
+* **通用卡曼增益方程**
+$$\boldsymbol{K_n}=\boldsymbol{P_{n,n-1}H^T(HP_{n,n-1}H^T+R_n)}^{-1}$$
+> 式中:   
+$\boldsymbol{K_n}$&emsp;&emsp;&nbsp; &nbsp;是卡曼增益   
+$\boldsymbol{P_{n,n-1}}$&emsp;是当前状态(在前一状态下预测)的先验估计不确定性(协方差)矩阵   
+$\boldsymbol{H}$ &emsp;  &emsp; &nbsp; &nbsp;是观测矩阵   
+$\boldsymbol{R_n}$&emsp; &emsp;&nbsp; &nbsp;是测量不确定性协方差矩阵
+
+以上矩阵均已推出，带入可得:
+$$\begin{aligned}
+  \boldsymbol{K_n}&=
+  \begin{bmatrix}
+  p_{x_{n,n-1}}&p_{{x\dot{x}}_{n,n-1}}&p_{x\ddot{x}_{n,n-1}}&0&0&0\\
+  p_{\dot{x}x_{n,n-1}}&p_{\dot{x}_{n,n-1}}&p_{\dot{x}\ddot{x}_{n,n-1}}&0&0&0\\
+  p_{\ddot{x}x_{n,n-1}}&p_{\ddot{x}\dot{x}_{n,n-1}}&p_{\ddot{x}_{n,n-1}}&0&0&0\\
+  0&0&0&p_{y_{n,n-1}}&p_{y\dot{y}_{n,n-1}}&p_{y\ddot{y}_{n,n-1}}\\
+  0&0&0&p_{\dot{y}y_{n,n-1}}&p_{\dot{y}_{n,n-1}}&p_{\dot{y}\ddot{y}_{n,n-1}}\\
+  0&0&0&p_{\ddot{y}y_{n,n-1}}&p_{\ddot{y}\dot{y}_{n,n-1}}&p_{\ddot{y}_{n,n-1}}
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+  1&0\\
+  0&0\\
+  0&0\\
+  0&1\\
+  0&0\\
+  0&0\\
+\end{bmatrix}\\
+
+&\cdot 
+( \begin{bmatrix}
+  1 & 0 & 0 & 0 & 0 & 0\\
+  0 & 0 & 0 & 1 & 0 & 0
+\end{bmatrix}
+
+\begin{bmatrix}
+  p_{x_{n,n-1}}&p_{{x\dot{x}}_{n,n-1}}&p_{x\ddot{x}_{n,n-1}}&0&0&0\\
+  p_{\dot{x}x_{n,n-1}}&p_{\dot{x}_{n,n-1}}&p_{\dot{x}\ddot{x}_{n,n-1}}&0&0&0\\
+  p_{\ddot{x}x_{n,n-1}}&p_{\ddot{x}\dot{x}_{n,n-1}}&p_{\ddot{x}_{n,n-1}}&0&0&0\\
+  0&0&0&p_{y_{n,n-1}}&p_{y\dot{y}_{n,n-1}}&p_{y\ddot{y}_{n,n-1}}\\
+  0&0&0&p_{\dot{y}y_{n,n-1}}&p_{\dot{y}_{n,n-1}}&p_{\dot{y}\ddot{y}_{n,n-1}}\\
+  0&0&0&p_{\ddot{y}y_{n,n-1}}&p_{\ddot{y}\dot{y}_{n,n-1}}&p_{\ddot{y}_{n,n-1}}
+\end{bmatrix}
+
+\begin{bmatrix}
+  1&0\\
+  0&0\\
+  0&0\\
+  0&1\\
+  0&0\\
+  0&0\\
+\end{bmatrix}
++
+\begin{bmatrix}
+  \sigma_{x_m}^2&0\\
+  0&\sigma_{y_m}^2
+\end{bmatrix}
+)^{-1}
+\end{aligned}$$
+
+④ 状态更新方程   
+状态更新方程可以描述为如下:
+$$\boldsymbol{\hat{x}_{n,n}}=\boldsymbol{\hat{x}}_{n,n-1}+\boldsymbol{K_n(z_n-H\hat{x}}_{n,n-1})$$
 
 
 
