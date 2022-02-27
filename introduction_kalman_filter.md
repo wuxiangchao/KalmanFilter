@@ -1161,13 +1161,12 @@ $$
 \begin{bmatrix}
   \frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2} & 0 & 0&0\\
   \frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t &0 &0 &0\\
-  \Delta t^2              &\Delta t &1&0 &0 &0\\
+  \frac{\Delta t^2}{2}              &\Delta t &1&0 &0 &0\\
   0&0&0&\frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2}\\
   0&0&0&\frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t\\
-  0&0&0&\Delta t^2              &\Delta t &1\\
+  0&0&0&\frac{\Delta t^2}{2}              &\Delta t &1\\
 \end{bmatrix}
 \sigma_a^2
-
 $$
 
 > 式中:    
@@ -1225,10 +1224,10 @@ $$
 \begin{bmatrix}
   \frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2} & 0 & 0&0\\
   \frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t &0 &0 &0\\
-  \Delta t^2              &\Delta t &1&0 &0 &0\\
+  \frac{\Delta t^2}{2}              &\Delta t &1&0 &0 &0\\
   0&0&0&\frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2}\\
   0&0&0&\frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t\\
-  0&0&0&\Delta t^2              &\Delta t &1\\
+  0&0&0&\frac{\Delta t^2}{2}              &\Delta t &1\\
 \end{bmatrix}
   
 \end{aligned}
@@ -1393,12 +1392,103 @@ $$
 
 $$
 
-④ 状态更新方程
+④ 状态更新方程    
 状态更新方程可以描述为如下:
 
 $$
 \boldsymbol{\hat{x}_{n,n}}=\boldsymbol{\hat{x}}_{n,n-1}+\boldsymbol{K_n(z_n-H\hat{x}}_{n,n-1})
 $$
 > 式中:    
-$\hat{x}_{n,n}$&emsp;是$n$时刻的系统状态适量估计值    
-$\hat{x}_{n+1,n}$&emsp;是$n-1$时刻预测的$n$时刻的值
+$\hat{x}_{n,n}$&emsp;&emsp;是$n$时刻的系统状态适量估计值    
+$\hat{x}_{n+1,n}$&emsp;是$n-1$时刻预测的$n$时刻的值    
+$\boldsymbol{K_n}$&emsp; &emsp;是卡曼增益    
+$z_n$&emsp;&emsp;&emsp;是测量值    
+$\boldsymbol{H}$&emsp;&emsp;&emsp;是观测矩阵
+
+<br/><br/>
+⑤协方差更新方程    
+协方差更新矩阵描述如下:
+$$\boldsymbol{P_{n,n}=(I-K_nH)P_{n,n-1}(I-K_nH)^T+K_nR_nK_n^T}$$
+> 式中:    
+$\boldsymbol{P_{n,n}}$&emsp; &emsp;是当前状态的协方差估计不确定性    
+$\boldsymbol{P_{n,n-1}}$&emsp;是当前状态的先验估计(在$n-1$时预测$n$)不确定性协方差矩阵    
+$\boldsymbol{K_n}$&emsp;&emsp;&emsp;是卡曼增益    
+$\boldsymbol{H}$&emsp; &emsp; &emsp;是观测矩阵    
+$\boldsymbol{I}$&emsp;&emsp;&emsp;&emsp;是单位矩阵    
+$\boldsymbol{R_n}$&emsp;&emsp;&emsp;是测量噪声协方差矩阵
+
+<br/><br/>
+#### 数值算例
+* 算例描述:
+  > 假设一辆汽车以恒定速度沿$$方向直线行驶。行驶$400m$后，车辆右转，转弯半径为$300$米。在转弯机动过程中，车辆会因圆周运动（角加速度）而经历加速度。
+
+* 运动如下图所示:
+![CHART](./ex9_TruePosition.png)
+
+* 参数描述:
+  > * 测量时间间隔：$\Delta t=1s$    
+  > * 随机加测度标准差: $\sigma_a=0.2\frac{m}{s^2}$    
+  > * 测量误差标准差: $\sigma_{x_m}=\sigma_{y_m}=3m$    
+  > * 状态转换矩阵$\boldsymbol{F}$：
+  $$\boldsymbol{F}=
+  \begin{bmatrix}
+  1&\Delta t&\frac{1}{2}\Delta t^2&0&0&0\\
+  0&1&\Delta t&0&0&0\\
+  0&0&1&0&0&0\\
+  0&0&0&1&\Delta t&\frac{1}{2}\Delta t^2\\
+  0&0&0&0&1&\Delta t\\
+  0&0&0&0&0&1\\
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+  1&1&\frac{1}{2}&0&0&0\\
+  0&1&1&0&0&0\\
+  0&0&1&0&0&0\\
+  0&0&0&1&1&\frac{1}{2}\\
+  0&0&0&0&1&1\\
+  0&0&0&0&0&1\\
+  \end{bmatrix}
+  $$
+  > * 过程噪声矩阵$\boldsymbol{Q}$:
+  $$
+  \boldsymbol{Q}=
+  \begin{bmatrix}
+    \frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2} & 0 & 0&0\\
+    \frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t &0 &0 &0\\
+    \frac{\Delta t^2}{2}              &\Delta t &1&0 &0 &0\\
+    0&0&0&\frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2}\\
+    0&0&0&\frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t\\
+    0&0&0&\frac{\Delta t^2}{2}              &\Delta t &1\\
+  \end{bmatrix}
+  \sigma_a^2
+  =
+  \begin{bmatrix}
+    \frac{1}{4}    &\frac{1}{2}    &\frac{1}{2} & 0 & 0&0\\
+    \frac{1}{2}    &1              &1 &0 &0 &0\\
+    1              &1 &1&0 &0 &0\\
+    0&0&0&\frac{1}{4}    &\frac{1}{2}    &\frac{1}{2}\\
+    0&0&0&\frac{1}{2}    &1              &1\\
+    0&0&0&\frac{1}{2}             &1 &1\\
+  \end{bmatrix}
+  0.2^2
+  $$
+
+  > * 测量不确定性矩阵$\boldsymbol{R_n}$:
+  $$\boldsymbol{R_n}=
+  \begin{bmatrix}
+    \sigma_{x_m}^2&0\\
+    0&\sigma_{y_m}^2
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    9&0\\
+    0&9
+  \end{bmatrix}
+  $$
+
+
+下表包含$35$组测量数据:     
+|\| 1|  2	|  3	|  4	|  5	|  6	|  7	|  8	|  9	|  10	|  11	|  12	|  13	|  14  |	15	|  16	|  17	|  18	|  19	|  20	|  21	|  22	|  23	|  24	|  25	|  26	|  27	|  28  |	29	|  30	|  31	|  32	|  33	|  34	|  35 | 
+|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+|x(m)|	-393.66|	-375.93|	-351.04|	-328.96	|-299.35|	-273.36|	-245.89|	-222.58|	-198.03|	-174.17|	-146.32|	-123.72|	-103.47|	-78.23|	-52.63|	-23.34|	25.96|	49.72|	76.94|	95.38|	119.83|	144.01|	161.84|	180.56|	201.42|	222.62|	239.4|	252.51|	266.26|	271.75|	277.4|	294.12|	301.23|	291.8|	299.89|
+|y(m)|	300.4	|301.78	|295.1	|305.19	|301.06	|302.05	|300	|303.57|	296.33|	297.65|	297.41|	299.61|	299.6|	302.39|	295.04|	300.09|	294.72|	298.61|	294.64|	284.88|	272.82|	264.93|	251.46|	241.27|	222.98|	203.73|	184.1|	166.12|	138.71|	119.71|	100.41|	79.76|	50.62	|32.99|	2.14|
