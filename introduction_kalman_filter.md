@@ -1519,7 +1519,7 @@ $$
 $$
 
 **预测**:通过初始值预测第一次的值$\hat{\boldsymbol{x}}_{1,0}$:
-$$\hat{x}_{1,0}=\boldsymbol{F}\hat{x}_{0,0}
+$$\hat{x}_{1,0}=\boldsymbol{F}\hat{x}_{0,0}=
 \begin{bmatrix}
   0\\
   0\\
@@ -1677,3 +1677,4 @@ $$
 \end{bmatrix}
 $$
 
+···
