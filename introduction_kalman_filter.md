@@ -1228,7 +1228,7 @@ $$
   0&0&0&\frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}    &\frac{\Delta t^2}{2}\\
   0&0&0&\frac{\Delta t^3}{2}    &\Delta t^2              &\Delta t\\
   0&0&0&\frac{\Delta t^2}{2}              &\Delta t &1\\
-\end{bmatrix}
+\end{bmatrix}\sigma_a^2
   
 \end{aligned}
 
@@ -1416,7 +1416,7 @@ $\boldsymbol{I}$&emsp;&emsp;&emsp;&emsp;是单位矩阵
 $\boldsymbol{R_n}$&emsp;&emsp;&emsp;是测量噪声协方差矩阵
 
 <br/><br/>
-#### 数值算例
+#### **数值算例 9**
 * 算例描述:
   > 假设一辆汽车以恒定速度沿$$方向直线行驶。行驶$400m$后，车辆右转，转弯半径为$300$米。在转弯机动过程中，车辆会因圆周运动（角加速度）而经历加速度。
 
@@ -1519,7 +1519,7 @@ $$
 $$
 
 **预测**:通过初始值预测第一次的值$\hat{\boldsymbol{x}}_{1,0}$:
-$$\hat{x}_{1,0}=\boldsymbol{F}\hat{x}_{0,0}=
+$$\hat{x}_{1,0}=\boldsymbol{F}\hat{x}_{0,0}
 \begin{bmatrix}
   0\\
   0\\
@@ -1559,7 +1559,7 @@ $$
   > * 计算卡曼增益:
     $$
     \begin{aligned}
-      \boldsymbol{K_1}&=\boldsymbol{P_{1,0}H^T(HP_{1,0}H^T+R_n)}^{-1}\\
+      \boldsymbol{K_1}&=\boldsymbol{P_{1,0}H^T(HP_{1,0}H^T+R_1)}^{-1}\\
     &=
     \begin{bmatrix}
       1125&750&250&0&0&0\\
@@ -1677,4 +1677,659 @@ $$
 \end{bmatrix}
 $$
 
-···
+**③ 迭代2**    
+* 第一步 **测量**
+$$\boldsymbol{z_2}=
+\begin{bmatrix}
+  -375.93\\
+  301.78
+\end{bmatrix}
+$$
+
+* 第二步 **更新$(n-1\rightarrow n)$**
+  > * 计算卡曼增益:
+    $$
+    \begin{aligned}
+      \boldsymbol{K_2}&=\boldsymbol{P_{2,1}H^T(HP_{2,1}H^T+R_2)}^{-1}\\
+    &=
+    \begin{bmatrix}
+      972&1236&559&0&0&0\\
+      1236&1618&780&0&0&0\\
+      559&780&445&0&0&0\\
+      0&0&0&972&1236&559\\
+      0&0&0&1236&1618&780\\
+      0&0&0&559&780&445
+    \end{bmatrix}
+    \begin{bmatrix}
+      1 & 0 \\
+      0 & 0 \\ 
+      0 & 0 \\
+      0 & 1 \\
+      0 & 0 \\
+      0 & 0 \\
+    \end{bmatrix}
+    ( \begin{bmatrix}
+      1 & 0 & 0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 1 & 0 & 0
+    \end{bmatrix}
+
+    \begin{bmatrix}
+      972&1236&559&0&0&0\\
+      1236&1618&780&0&0&0\\
+      559&780&445&0&0&0\\
+      0&0&0&972&1236&559\\
+      0&0&0&1236&1618&780\\
+      0&0&0&559&780&445
+    \end{bmatrix}
+
+    \begin{bmatrix}
+      1&0\\
+      0&0\\
+      0&0\\
+      0&1\\
+      0&0\\
+      0&0\\
+    \end{bmatrix}
+    +
+    \begin{bmatrix}
+      9&0\\
+      0&9
+    \end{bmatrix}
+    )^{-1}\\
+    &=
+    \begin{bmatrix}
+      0.9908&0\\
+      1.26&0\\
+      0.57&0\\
+      0&0.9908\\
+      0&1.26\\
+      0&0.57
+    \end{bmatrix}
+    \end{aligned}
+    $$
+
+  > * 估计当前状态($n-1\rightarrow n$):
+    $$\hat{\boldsymbol{x}}_{2,2}=\hat{\boldsymbol{x}}_{2,1}+\boldsymbol{K}_2(\boldsymbol{z_2}-\boldsymbol{H\hat{x}_{2,1}})
+    =
+    \begin{bmatrix}
+      -378.9\\
+      53.8\\
+      94.5\\
+      303.9\\
+      -22.3\\
+      63.6
+    \end{bmatrix}
+    $$
+
+    > * 估计当前状态($n-1\rightarrow n$):
+    $$
+    \begin{aligned}
+      \boldsymbol{P_{2,2}}&=\boldsymbol{(I-K_2H)P_{2,1}(I-K_2H)^T+K_2R_2K_2^T}\\
+      &=
+      \begin{bmatrix}
+        8.92&11.33&5.13&0&0&0\\
+        11.33&61.1&75.4&0&0&0\\
+        5.13&75.4&126.5&0&0&0\\
+        0&0&0&8.92&11.33&5.13\\
+        0&0&0&11.33&61.1&75.4\\
+        0&0&0&5.13&75.4&126.5
+      \end{bmatrix}
+    \end{aligned}
+    $$
+
+* 第三步 **预测$(n\rightarrow n+1)$**    
+    
+状态矢量预测
+$$\hat{x}_{3,2}=\boldsymbol{F}\hat{x}_{2,2}
+\begin{bmatrix}
+      −277.8\\
+      148.3\\
+      94.5\\
+      249.8\\
+      −85.9\\
+      −63.6
+    \end{bmatrix}
+$$
+
+  估计不确定性预测:
+$$
+\boldsymbol{P_{3,2}}
+=
+\boldsymbol{FP_{2,2}F^T}+\boldsymbol{Q}
+=
+
+\begin{bmatrix}
+  204.9&254&143.8&0&0&0\\
+  254&338.5&202&0&0&0\\
+  143.8&202&126.5&0&0&0\\
+  0&0&0&204.9&254&143.8\\
+  0&0&0&254&338.5&202\\
+  0&0&0&143.8&202&126.5
+\end{bmatrix}
+$$
+
+**编写代码完成剩余的迭代过程**
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+class KalmanFilter:
+    def __init__(self, delta_t, sigma_a, sigma_x, sigma_y):
+        self.delta_t = delta_t
+        self.sigma_a = sigma_a
+        self.sigma_x = sigma_x
+        self.sigma_y = sigma_y
+
+        self.x_p = []
+        self.y_p = []
+
+        self.I = np.matrix(np.identity(6))
+
+        # 状态变换矩阵
+        self.F = np.matrix(np.array(
+            [
+                [1, self.delta_t, 1 / 2 * self.delta_t ** 2, 0, 0, 0],
+                [0, 1, self.delta_t, 0, 0, 0],
+                [0, 0, 1, 0, 0, 0],
+                [0, 0, 0, 1, self.delta_t, 1 / 2 * self.delta_t ** 2],
+                [0, 0, 0, 0, 1, self.delta_t],
+                [0, 0, 0, 0, 0, 1]
+            ]
+        ))
+
+        # 过程噪声矩阵
+        self.Q = np.matrix(np.array(
+            [
+                [self.delta_t**4 / 4, self.delta_t **
+                    3 / 2, self.delta_t**2 / 2, 0, 0, 0],
+                [self.delta_t**3 / 2, self.delta_t**2, self.delta_t, 0, 0, 0],
+                [self.delta_t**2 / 2, self.delta_t**2, 1, 0, 0, 0],
+                [0, 0, 0, self.delta_t**4 / 4, self.delta_t **
+                    3 / 2, self.delta_t**2 / 2],
+                [0, 0, 0, self.delta_t**3 / 2, self.delta_t**2, self.delta_t],
+                [0, 0, 0, self.delta_t**2 / 2, self.delta_t, 1]
+            ]
+        )) * self.sigma_a**2
+
+        # 测量不确定性矩阵
+        self.R = np.matrix(np.array(
+            [
+                [self.sigma_y**2, 0],
+                [0, self.sigma_y**2]
+            ]))
+
+        # 观测矩阵
+        self.H = np.matrix(np.array(
+            [
+                [1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 1, 0, 0]
+            ]))
+
+        self.x = np.matrix(np.zeros((6, 1)))
+
+        self.P = np.matrix(np.zeros((6, 6)))
+        self.P[0, 0] = self.P[1, 1] = self.P[2, 2] = 500
+        self.P[3, 3] = self.P[4, 4] = self.P[5, 5] = 500
+
+    def update(self, z):
+        # 计算卡曼增益
+        self.Kn = self.P.dot(self.H.transpose()).dot(
+            (self.H.dot(self.P).dot(self.H.transpose()) + self.R).I)
+        # 系统状态更新(n,n-1 -> n,n)
+        self.x = self.x + self.Kn.dot(z - self.H.dot(self.x))
+        # 协方差矩阵更新(n,n-1 -> n,n)
+        self.P = (self.I - self.Kn.dot(self.H)).dot(self.P)\
+            .dot((self.I - self.Kn.dot(self.H)).transpose()) \
+            + self.Kn.dot(self.R).dot(self.Kn.transpose())
+        self.x_p.append(self.x[0, 0])
+        self.y_p.append(self.x[3, 0])
+
+    def predict(self):
+        # 状态外推(n,n -> n+1,n)
+        self.x = self.F.dot(self.x)
+        # 协方差外推(n,n -> n+1,n)
+        self.P = self.F.dot(self.P).dot(self.F.transpose()) + self.Q
+
+
+x_measured = [-393.66, -375.93, -351.04, -328.96, -299.35, -273.36, -245.89,
+              -222.58, -198.03, -174.17, -146.32, -123.72, -103.47, -78.23, -52.63,
+              -23.34, 25.96, 49.72, 76.94, 95.38, 119.83, 144.01, 161.84, 180.56, 201.42,
+              222.62, 239.4, 252.51, 266.26, 271.75, 277.4, 294.12, 301.23, 291.8, 299.89]
+
+y_measured = [300.4, 301.78, 295.1, 305.19, 301.06, 302.05, 300, 303.57, 296.33,
+              297.65, 297.41, 299.61, 299.6, 302.39, 295.04, 300.09, 294.72, 298.61,
+              294.64, 284.88, 272.82, 264.93, 251.46, 241.27, 222.98, 203.73, 184.1,
+              166.12, 138.71, 119.71, 100.41, 79.76, 50.62, 32.99, 2.14]
+
+
+kf = KalmanFilter(1, 0.2, 3, 3)
+# 初始化后先预测n->n+1
+kf.predict()
+
+for i in range(len(x_measured)):
+    z = np.matrix(np.array([[x_measured[i]], [y_measured[i]]]))
+    kf.update(z)
+    kf.predict()
+
+
+# true
+x_true = np.linspace(-400, 300, 1000)
+y_true = []
+for i in x_true:
+    if i < 0:
+        y_true.append(300)
+    else:
+        y_true.append(((300)**2 - i**2)**(1 / 2))
+
+# x_2_true = np.
+
+
+plt.plot(kf.x_p, kf.y_p, 'ro-', label='Estimates')
+plt.plot(x_measured, y_measured, 'bv-', label='Measured')
+plt.plot(x_true, y_true, 'g-', label='True')
+plt.legend(loc='best')
+plt.xlabel("X(m)")
+plt.ylabel("Y(m)")
+plt.title("Kalman filter for vehicle estimates")
+plt.show()
+```
+
+* 结果曲线图:    
+![Chart](./exmaple_09_location.png)
+
+
+<br/><br/>
+#### **数值算例 10**    
+* 算例描述:    
+  在本例中，我们将估计火箭的高度。火箭配备了一个提供高度测量的机载高度表。除了高度表，火箭还配备了一个加速计，用于测量火箭加速度。
+* 示意图:    
+![Chart](./ex10_rocket.png)
+
+$n$时刻的加速度测量值:
+$$a_n=\ddot{x}-g+\epsilon$$
+> 式中:    
+> * $\ddot{x}$&emsp;是物体实际加速度
+> * $g$&emsp;&nbsp;是重力加速度常量: $g=-9.8(\frac{m}{s^2})$
+> * $\epsilon$&emsp;&nbsp;是加速度测量误差
+
+① 状态外推方程
+
+* 通用格式状态外推方程:
+
+$$
+\hat{\boldsymbol{x}}_{n+1,n}=\boldsymbol{F}\hat{\boldsymbol{x}}_{n,n}+\boldsymbol{G}\boldsymbol{u}_n+\boldsymbol{w}_n
+
+$$
+
+> 式中:    
+> $\hat{\boldsymbol{x}}_{n+1,n}$&emsp;是$n+1$时刻的系统状态矢量的预测    
+> $\hat{\boldsymbol{x}}_{n,n}$&emsp;&emsp;是$n$时刻的系统状态矢量的估计    
+> $\boldsymbol{u}_n$&nbsp;&nbsp; &emsp;&emsp;是控制变量    
+> $\boldsymbol{w}_n$&nbsp;&nbsp;&emsp;&emsp;是过程噪声    
+> $\boldsymbol{F}$&nbsp;&nbsp; &nbsp; &emsp;&emsp;是状态变换矩阵    
+> $\boldsymbol{G}$&nbsp; &nbsp; &emsp;&emsp;是控制矩阵
+
+
+
+系统状态矢量$\boldsymbol{x}_n$定义为:
+
+$$
+\boldsymbol{x}_n=\begin{bmatrix}
+x_n\\
+\dot{x}_n\\
+\end{bmatrix}
+$$
+
+> 式中:    
+> * $x_n$&emsp;是火箭$n$时刻的高度
+> * $\dot{x_n}$&emsp;是$n$时刻的火箭速度
+
+<br/>
+
+
+$n+1$时刻的系统状态可以描述为矩阵格式:
+
+$$
+\begin{bmatrix}
+  \hat{x}_{n+1,n}\\
+  \hat{\dot{x}}_{n+1,n}\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+  1&\Delta t\\
+  0&1\\
+\end{bmatrix}
+\begin{bmatrix}
+  \hat{x}_{n,n}\\
+  \hat{\dot{x}}_{n,n}\\
+\end{bmatrix}
++
+\begin{bmatrix}
+  0.5\Delta t^2\\
+  \Delta t
+\end{bmatrix}(a_n+g)
+$$
+
+上述方程可得:
+$$\boldsymbol{F}=
+\begin{bmatrix}
+  1&\Delta t\\
+  0&1
+\end{bmatrix}
+$$
+
+$$\boldsymbol{G}=
+\begin{bmatrix}
+  0.5\Delta^2\\
+  \Delta t
+\end{bmatrix}
+$$
+
+$$\boldsymbol{u_n}=
+(a_n+g)
+$$
+
+②协方差外推方程
+
+* 通用格式协方差外推方程:
+
+$$
+\boldsymbol{P}_{n+1,n}=\boldsymbol{FP_{n,n}F^T}+\boldsymbol{Q}$$ 
+
+>式中:     
+$\boldsymbol{P_{n,n}}$      是当前状态估计不确定性的协方差矩阵    
+$\boldsymbol{P_{n+1,n}}$ 是下一状态预测不确定性的协方差矩阵   
+$\boldsymbol{F}$      是状态变换矩阵   
+$\boldsymbol{Q}$      是过程噪声矩阵
+
+估计不确定性矩阵$\boldsymbol{P}$:
+$$\boldsymbol{P}=\begin{bmatrix}
+  p_x&p_{x\dot{x}}\\
+  p_{\dot{x}x}&p_{\dot{x}}\\
+
+\end{bmatrix}
+
+$$
+
+> 式中:    
+> $p_x$&emsp;&emsp;是$X$高度估计的方差    
+> $p_{\dot{x}}$&emsp;&emsp;是$X$速度估计的方差    
+> 非对角项是协方差
+
+
+过程噪声矩阵$\boldsymbol{Q}$：
+
+$$
+\boldsymbol{Q} = 
+  \left[ \begin{matrix}						
+    \sigma_{x}^{2} 				& \sigma_{x\dot{x}}^{2}\\
+    \sigma_{\dot{x}x}^{2} 		& \sigma_{\dot{x}}^{2}\\
+
+  \end{matrix}
+  \right]
+
+$$
+
+示例中推导得:
+
+$$
+\boldsymbol{Q}=
+\begin{bmatrix}
+  \frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}\\
+  \frac{\Delta t^3}{2}    &\Delta t^2\\
+
+\end{bmatrix}
+\epsilon^2
+$$
+
+> 式中:    
+> $\Delta t$&emsp;是多次测量的时间间隔    
+> $\epsilon^2$&emsp;是加速度的随机误差
+
+<br/><br/>
+
+带入方程:$\boldsymbol{P}_{n+1,n}=\boldsymbol{FP_{n,n}F^T}+\boldsymbol{Q}$有:
+
+$$
+\begin{aligned}
+\boldsymbol{P_{n+1,n}} 
+&=
+\begin{bmatrix}
+  p_{x_{n+1,n}}&p_{{x\dot{x}}_{n+1,n}}\\
+  p_{\dot{x}x_{n+1,n}}&p_{\dot{x}_{n+1,n}}\\
+\end{bmatrix}\\
+&=
+\begin{bmatrix}
+  1&\Delta t\\
+  0&1\\
+\end{bmatrix}
+
+\cdot
+\begin{bmatrix}
+  p_{x_{n,n}}&p_{{x\dot{x}}_{n,n}}\\
+  p_{\dot{x}x_{n,n}}&p_{\dot{x}_{n,n}}
+\end{bmatrix}
+
+\cdot
+\begin{bmatrix}
+  1&0\\
+  \Delta t&1\\
+\end{bmatrix}
+
++
+
+\begin{bmatrix}
+  \frac{\Delta t^4}{4}    &\frac{\Delta t^3}{2}\\
+  \frac{\Delta t^3}{2}    &\Delta t^2\\
+\end{bmatrix}\epsilon^2
+  
+\end{aligned}
+
+$$
+
+<br/><br/>
+
+③ 卡曼增益方程
+
+* **测量不确定性**
+  测量协方差矩阵:
+
+$$
+\boldsymbol{R_n}=
+\begin{bmatrix}
+  \sigma_{x_m}^2
+\end{bmatrix}
+
+$$
+
+
+实际测量中，每次测量的不确定性均布相同，算例中假设每次测量中不确定性相等。
+<br/>
+
+* **测量方程**
+  通用测量方程表示如下:
+
+$$
+\boldsymbol{z_n}=\boldsymbol{Hx_n}+\boldsymbol{v_n}
+
+$$
+
+> 式中:    
+> $\boldsymbol{z_n}$&emsp;是测量状态量矢量    
+> $\boldsymbol{x_n}$&emsp;是系统状态量真值    
+> $\boldsymbol{v_n}$&emsp;是随机状态量矢量    
+> $\boldsymbol{H}$&emsp;是观测矩阵
+
+<br/>
+
+观测仅提供$X,Y$的坐标:
+
+$$
+\boldsymbol{z_n}=\begin{bmatrix}
+  x_{n,n}
+\end{bmatrix}
+
+$$
+
+带入观测方程:
+
+$$
+\boldsymbol{z_n}=\begin{bmatrix}
+  x_{n,n}
+\end{bmatrix}
+=\boldsymbol{H}
+\cdot
+\begin{bmatrix}
+  x_{n,n}\\
+  \dot{x}_{n,n}
+\end{bmatrix}
+
+$$
+
+可以推导得观测矩阵$\boldsymbol{H}$:
+
+$$
+\boldsymbol{H}=
+\begin{bmatrix}
+  1 & 0\\
+\end{bmatrix}
+$$
+
+* **通用卡曼增益方程**
+
+$$
+\boldsymbol{K_n}=\boldsymbol{P_{n,n-1}H^T(HP_{n,n-1}H^T+R_n)}^{-1}
+$$
+
+> 式中:    
+> $\boldsymbol{K_n}$&emsp;&emsp;&nbsp; &nbsp;是卡曼增益    
+> $\boldsymbol{P_{n,n-1}}$&emsp;是当前状态(在前一状态下预测)的先验估计不确定性(协方差)矩阵   
+> $\boldsymbol{H}$ &emsp;  &emsp; &nbsp; &nbsp;是观测矩阵   
+> $\boldsymbol{R_n}$&emsp; &emsp;&nbsp; &nbsp;是测量不确定性协方差矩阵
+
+以上矩阵均已推出，带入可得:
+
+$$
+\begin{aligned}
+  \boldsymbol{K_n}&=
+  \begin{bmatrix}
+  p_{x_{n,n-1}}&p_{{x\dot{x}}_{n,n-1}}\\
+  p_{\dot{x}x_{n,n-1}}&p_{\dot{x}_{n,n-1}}
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+  1\\
+  0
+\end{bmatrix}
+
+\cdot 
+( \begin{bmatrix}
+  1 & 0\\
+\end{bmatrix}
+
+\begin{bmatrix}
+  p_{x_{n,n-1}}&p_{{x\dot{x}}_{n,n-1}}\\
+  p_{\dot{x}x_{n,n-1}}&p_{\dot{x}_{n,n-1}}
+\end{bmatrix}
+
+\begin{bmatrix}
+  1\\
+  0
+\end{bmatrix}
++
+\begin{bmatrix}
+  \sigma_{x_m}^2\\
+\end{bmatrix}
+)^{-1}
+\end{aligned}
+
+$$
+
+④ 状态更新方程    
+状态更新方程可以描述为如下:
+
+$$
+\boldsymbol{\hat{x}_{n,n}}=\boldsymbol{\hat{x}}_{n,n-1}+\boldsymbol{K_n(z_n-H\hat{x}}_{n,n-1})
+$$
+> 式中:    
+$\hat{x}_{n,n}$&emsp;&emsp;是$n$时刻的系统状态适量估计值    
+$\hat{x}_{n+1,n}$&emsp;是$n-1$时刻预测的$n$时刻的值    
+$\boldsymbol{K_n}$&emsp; &emsp;是卡曼增益    
+$z_n$&emsp;&emsp;&emsp;是测量值    
+$\boldsymbol{H}$&emsp;&emsp;&emsp;是观测矩阵
+
+<br/><br/>
+⑤协方差更新方程    
+协方差更新矩阵描述如下:
+$$\boldsymbol{P_{n,n}=(I-K_nH)P_{n,n-1}(I-K_nH)^T+K_nR_nK_n^T}$$
+> 式中:    
+$\boldsymbol{P_{n,n}}$&emsp; &emsp;是当前状态的协方差估计不确定性    
+$\boldsymbol{P_{n,n-1}}$&emsp;是当前状态的先验估计(在$n-1$时预测$n$)不确定性协方差矩阵    
+$\boldsymbol{K_n}$&emsp;&emsp;&emsp;是卡曼增益    
+$\boldsymbol{H}$&emsp; &emsp; &emsp;是观测矩阵    
+$\boldsymbol{I}$&emsp;&emsp;&emsp;&emsp;是单位矩阵    
+$\boldsymbol{R_n}$&emsp;&emsp;&emsp;是测量噪声协方差矩阵
+
+> 算例参数定义:
+> * 测量时间间隔: $\Delta t = 0.25s$
+> * 火箭加速度$\ddot{x}=30(\frac{m}{s^2})$
+> * 高度测量误差标准差: $\sigma_{x_m}=20m$
+> * 加速度测量误差标准差: $\epsilon=0.1(\frac{m}{s^2})$
+> * 状态变换矩阵$\boldsymbol{F}$:
+$$\boldsymbol{F}=
+\begin{bmatrix}
+  1  & \Delta t\\
+  0  &        1
+\end{bmatrix}
+
+=
+
+\begin{bmatrix}
+  1  &  0.25\\
+  0  & 1
+\end{bmatrix}
+$$
+
+> * 控制矩阵$\boldsymbol{G}$:
+$$\boldsymbol{G}=
+\begin{bmatrix}
+  0.5\Delta t^2\\
+  \Delta t
+\end{bmatrix}
+
+=
+
+\begin{bmatrix}
+  0.0313\\
+  0.25
+\end{bmatrix}
+$$
+
+> * 过程噪声矩阵$\boldsymbol{Q}$:
+$$\boldsymbol{Q}=
+\begin{bmatrix}
+  \frac{\Delta t^4}{4}&\frac{\Delta t^3}{2}\\
+  \frac{\Delta t^3}{2}&\Delta t^2
+\end{bmatrix}\epsilon^2
+$$
+
+> * 测量不确定性$\boldsymbol{R}$:
+$$\boldsymbol{R_n}=\boldsymbol{R}=
+\begin{bmatrix}
+  \sigma_{x_m}^2
+\end{bmatrix}
+= 400
+$$
+
+测量数据表:     
+ | \ |1  |	2  | 	3  |	4 |	5 |	6 |	7 |	8 |	9 |	10 |	11 |	12 |	13 |	14 |	15 |	16 |	17| 18 |	19 |	20 |	21 |	22 |	23 |	24 |	25 |	26 |	27 |	28 |	29 |	30|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+Altitude 	$x_n(m)$|-32.4 |-11.1 |	18 |	22.9 |	19.5 |	28.5 |	46.5 |	68.9 |	48.2 |	56.1 |	90.5 |	104.9 |	140.9 |	148 |	187.6 |	209.2 |	244.6 |	276.4 |	323.5 |	357.3 | 	357.4 	|398.3 |	446.7 |	465.1 |	529.4 |	570.4 |	636.8 |	693.3 |	707.3 |	748.5|
+Acceleration 	$a_n(m/s^2)$|39.72 |	40.02 |	39.97 |	39.81 |	39.75 |	39.6 |	39.77 |	39.83 |	39.73 |	39.87 |	39.81 |	39.92 |	39.78 |	39.98 |	39.76 |	39.86 |	39.61 |	39.86 |	39.74 |	39.87 |	39.63 |	39.67 |	39.96 |	39.8 |	39.89 |	39.85 |	39.9 |	39.81 |	39.81 |	39.68|
+
+
+python代码实现Kalman Filter：    
+```python
+
+```
